@@ -1,14 +1,4 @@
-module Types (
-    Nome,
-    Quantidade,
-    HorarioProximo,
-    HoraAtual,
-    Horario,
-    Medicamento,
-    Medicamentos,
-    Prescricao,
-    PlanoMedicamento
-) where
+module Types where
 
 type Nome = String
 type Quantidade = Int

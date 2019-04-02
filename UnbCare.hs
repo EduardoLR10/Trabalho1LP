@@ -1,17 +1,10 @@
 module Main where
+import Types
 import Data.List
 
-type Nome = String
-type Quantidade = Int
-type HorarioProximo = Int
-type HoraAtual = Int
-type Horario = [Int]
-type Medicamento = (Nome,Quantidade)
-type Medicamentos = [Medicamento]
-type Prescricao = (Nome,Horario,HorarioProximo)
-type PlanoMedicamento = [Prescricao]
-
 remediosteste = [("R1", 32), ("R2", 55), ("R3", 1), ("R4", 0)]
+planoMedicamentoteste = [("R1", [10, 15, 23], 20), ("R2", [9, 13, 00], 20), ("R3", [1, 17, 23], 20)]
+horaatualteste = 23
 
 adicionarMedicamento :: Medicamento -> Medicamentos -> Medicamentos
 adicionarMedicamento (name, howmany) [] = (name, howmany) : []
@@ -43,9 +36,15 @@ tomarMedicamentoSOS name ((n, h):others)
     | name == n     = (n, h - 1) : others
     | otherwise     = (n, h) : tomarMedicamentoSOS name others
 
+-- tomarMedicamentosHorario :: PlanoMedicamento -> Medicamentos -> HoraAtual -> (PlanoMedicamento,Medicamentos)
+-- tomarMedicamentosHorario ((name, (h1:hs), hp): others) ((n, h):others1) time
+--     | name == n     = ()
+
+
 main = do
-    print(adicionarMedicamento ("R6", 10) remediosteste)
+    adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
+    print(adicionarMedicamento ("R7", 10) remediosteste)
     print(removerMedicamento "R2" remediosteste)
     print(consultarMedicamento "R7" remediosteste)
     print(alterarMedicamento ("R7", 20) remediosteste)
-    print(tomarMedicamentoSOS "R7" remediosteste)
+    -- print(tomarMedicamentoSOS "R7" remediosteste)
