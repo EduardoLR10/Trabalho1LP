@@ -37,8 +37,15 @@ alterarMedicamento (name, howmany) ((n, h):others)
     | name == n     = (n, howmany) : others
     | otherwise     = (n, h) : alterarMedicamento (name, howmany) others
 
+tomarMedicamentoSOS  ::  Nome -> Medicamentos ->  Medicamentos
+tomarMedicamentoSOS name [] = []
+tomarMedicamentoSOS name ((n, h):others)
+    | name == n     = (n, h - 1) : others
+    | otherwise     = (n, h) : tomarMedicamentoSOS name others
+
 main = do
     print(adicionarMedicamento ("R6", 10) remediosteste)
     print(removerMedicamento "R2" remediosteste)
     print(consultarMedicamento "R7" remediosteste)
     print(alterarMedicamento ("R7", 20) remediosteste)
+    print(tomarMedicamentoSOS "R7" remediosteste)
