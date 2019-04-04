@@ -1,10 +1,21 @@
 module Main where
-import Types
-import Data.List
 
-remediosteste = [("R1", 32), ("R2", 55), ("R3", 1), ("R4", 0)]
-planoMedicamentoteste = [("R1", [10, 15, 23], 20), ("R2", [9, 13, 00], 20), ("R3", [1, 17, 23], 20)]
-horaatualteste = 23
+type Nome = String
+type Quantidade = Int
+type HorarioProximo = Int
+type HoraAtual = Int
+type Horario = [Int]
+type Medicamento = (Nome,Quantidade)
+type Medicamentos = [Medicamento]
+type Prescricao = (Nome,Horario,HorarioProximo)
+type PlanoMedicamento = [Prescricao]
+
+hora_atual_teste :: HoraAtual
+hora_atual_teste = 23
+medicamentos_teste :: Medicamentos
+medicamentos_teste = [("A", 1), ("B", 2), ("C", 3), ("D", 4)]
+plano_medicamento_teste :: PlanoMedicamento
+plano_medicamento_teste = [("A", [23], 23), ("B", [00, 12], 00), ("C", [11, 23], 23), ("D", [11, 23], 23)]
 
 -- QUESTÂO 1
 adicionarMedicamento :: Medicamento -> Medicamentos -> Medicamentos
@@ -42,16 +53,27 @@ tomarMedicamentoSOS name ((n, h):others)
     | otherwise     = (n, h) : tomarMedicamentoSOS name others
 
 -- QUESTÂO 6
---- Tomar os medicamentos cujo próximo horário seja o mesmo da hora atual decrementando em um a quantidade existente.
---- Atualizar o plano de medicamentos configurando o pŕoximo horário de todas as prescrições.
+--- Tomar os medicamentos cujo próximo horário seja o mesmo da hora atual, decrementando em um a quantidade existente desses medicamentos tomados.
+--- Atualizar o plano de medicamentos configurando o próximo horário de todas as prescrições.
 tomarMedicamentosHorario :: PlanoMedicamento -> Medicamentos -> HoraAtual -> (PlanoMedicamento,Medicamentos)
 tomarMedicamentosHorario medication_plan medications current_horary = (medication_plan_f, medications_f)
     where
-    horary_prescritions = [(n, h, nh) | (n, h, nh) <- medication_plan, nh == current_horary]
-    medication_names = [n | (n, h, nh) <- horary_prescritions]
-    medication_plan_f = atualizarProximohorario medication_plan current_horary
+    medication_names = [n | (n, h, nh) <- medication_plan, nh == current_horary]
+    medication_plan_f = atualizarProximoshorarios medication_plan current_horary
     medications_f = tomarMedicamentos medication_names medications
 
+atualizarProximoshorarios :: PlanoMedicamento -> HoraAtual -> PlanoMedicamento
+atualizarProximoshorarios [] _       = []
+atualizarProximoshorarios ((name, horary, next_horary):medication_plan) current_horary
+    | next_horary == current_horary  = (name, horary, selectNextHorary horary current_horary):(atualizarProximoshorarios medication_plan current_horary) 
+    | otherwise                      = (name, horary, next_horary):(atualizarProximoshorarios medication_plan current_horary)
+    where
+    selectNextHorary h ch | [e | e <- h, e > ch] /= []  = minimum [e | e <- h, e > ch]
+                          | otherwise                   = minimum h
+
+tomarMedicamentos :: [Nome] -> Medicamentos -> Medicamentos
+tomarMedicamentos [] medications = medications
+tomarMedicamentos (medication_name:medication_names) medications = tomarMedicamentos medication_names (tomarMedicamentoSOS medication_name medications)
 
 main = do
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
