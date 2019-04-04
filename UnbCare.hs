@@ -1,4 +1,4 @@
-module Main where
+--module Main where
 
 type Nome = String
 type Quantidade = Int
@@ -13,7 +13,7 @@ type PlanoMedicamento = [Prescricao]
 hora_atual_teste :: HoraAtual
 hora_atual_teste = 23
 medicamentos_teste :: Medicamentos
-medicamentos_teste = [("A", 1), ("B", 2), ("C", 3), ("D", 4)]
+medicamentos_teste = [("A", 1), ("B", 2), ("C", 3), ("D", 4), ("ZERO", 0)]
 plano_medicamento_teste :: PlanoMedicamento
 plano_medicamento_teste = [("A", [23], 23), ("B", [00, 12], 00), ("C", [11, 23], 23), ("D", [11, 23], 23)]
 
@@ -82,7 +82,11 @@ cadastrarAlarmes medication_plan = sortWithoutRepetition(concat [h | (n, h, nh) 
     sortWithoutRepetition [] = []
     sortWithoutRepetition (a:as) = sortWithoutRepetition [e | e <- as, e < a] ++ [a] ++ sortWithoutRepetition [e | e <- as, e > a]
 
+-- QUESTÂO 8
+listarMedicamentosComprar :: Medicamentos ->  Medicamentos
+listarMedicamentosComprar medications = [(n, q) | (n, q) <- medications, q <= 0]
 
+{-
 main = do
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
     print(adicionarMedicamento ("R7", 10) remediosteste)
@@ -90,3 +94,4 @@ main = do
     print(consultarMedicamento "R7" remediosteste)
     print(alterarMedicamento ("R7", 20) remediosteste)
     -- print(tomarMedicamentoSOS "R7" remediosteste)
+-}
