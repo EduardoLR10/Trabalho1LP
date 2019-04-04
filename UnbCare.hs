@@ -75,6 +75,14 @@ tomarMedicamentos :: [Nome] -> Medicamentos -> Medicamentos
 tomarMedicamentos [] medications = medications
 tomarMedicamentos (medication_name:medication_names) medications = tomarMedicamentos medication_names (tomarMedicamentoSOS medication_name medications)
 
+-- QUESTÂO 7
+cadastrarAlarmes :: PlanoMedicamento -> Horario
+cadastrarAlarmes medication_plan = sortWithoutRepetition(concat [h | (n, h, nh) <- medication_plan])
+    where
+    sortWithoutRepetition [] = []
+    sortWithoutRepetition (a:as) = sortWithoutRepetition [e | e <- as, e < a] ++ [a] ++ sortWithoutRepetition [e | e <- as, e > a]
+
+
 main = do
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
     print(adicionarMedicamento ("R7", 10) remediosteste)
