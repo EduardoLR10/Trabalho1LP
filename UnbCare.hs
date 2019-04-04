@@ -42,11 +42,15 @@ tomarMedicamentoSOS name ((n, h):others)
     | otherwise     = (n, h) : tomarMedicamentoSOS name others
 
 -- QUESTÂO 6
+--- Tomar os medicamentos cujo próximo horário seja o mesmo da hora atual decrementando em um a quantidade existente.
+--- Atualizar o plano de medicamentos configurando o pŕoximo horário de todas as prescrições.
 tomarMedicamentosHorario :: PlanoMedicamento -> Medicamentos -> HoraAtual -> (PlanoMedicamento,Medicamentos)
-tomarMedicamentosHorario medication_plan medications current_horary 
-    | 
-    where 
-        [n | (n, h, nh) <- medication_plan, elem current_horary h] = 
+tomarMedicamentosHorario medication_plan medications current_horary = (medication_plan_f, medications_f)
+    where
+    horary_prescritions = [(n, h, nh) | (n, h, nh) <- medication_plan, nh == current_horary]
+    medication_names = [n | (n, h, nh) <- horary_prescritions]
+    medication_plan_f = atualizarProximohorario medication_plan current_horary
+    medications_f = tomarMedicamentos medication_names medications
 
 
 main = do
