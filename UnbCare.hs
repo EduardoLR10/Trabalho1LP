@@ -86,6 +86,13 @@ cadastrarAlarmes medication_plan = sortWithoutRepetition(concat [h | (n, h, nh) 
 listarMedicamentosComprar :: Medicamentos ->  Medicamentos
 listarMedicamentosComprar medications = [(n, q) | (n, q) <- medications, q <= 0]
 
+-- QUESTÂO 9
+comprarMedicamentosDias :: PlanoMedicamento -> Medicamentos -> Int -> Medicamentos
+comprarMedicamentosDias [] medications num_days = []
+comprarMedicamentosDias ((name, horary, next_horary):medication_plane) medications num_days = (name, num_days*length(horary) - quantity):(comprarMedicamentosDias medication_plane medications num_days)
+    where
+    (n, quantity) = consultarMedicamento name medications
+
 {-
 main = do
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
