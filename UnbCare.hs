@@ -9,9 +9,13 @@ type Medicamento = (Nome,Quantidade)
 type Medicamentos = [Medicamento]
 type Prescricao = (Nome,Horario,HorarioProximo)
 type PlanoMedicamento = [Prescricao]
+type Preco = Int
+type Farmacia = (Nome,[(Medicamento,Preco)])
+type Mercado = [Farmacia]
+type Compra = (Preco, Nome)
 
 hora_atual_teste :: HoraAtual
-hora_atual_teste = 23
+hora_atual_teste = 12
 
 medicamentos_teste :: Medicamentos
 medicamentos_teste = [("MA", 1),
@@ -21,10 +25,34 @@ medicamentos_teste = [("MA", 1),
                       ("M0", 0)]
 
 plano_medicamento_teste :: PlanoMedicamento
-plano_medicamento_teste = [("MA", [23    ], 23), 
-                           ("MB", [00, 12], 00), 
-                           ("MC", [11, 23], 23), 
-                           ("MD", [11, 23], 23)]
+plano_medicamento_teste = [("MA", [6, 12], 12), 
+                           ("MB", [00, 12, 18], 12), 
+                           ("MC", [11, 12, 23], 23), 
+                           ("MD", [11, 12, 13], 12)]
+                
+farmacia_teste :: Farmacia
+farmacia_teste = ("FA", [(("MA", 10), 1), 
+                         (("MB", 10), 2), 
+                         (("MC", 10), 3), 
+                         (("MD", 10), 4)])
+
+
+mercado_farmacia_teste :: Mercado
+mercado_farmacia_teste = [("FA", [(("MA", 10), 1), 
+                                  (("MB", 10), 2), 
+                                  (("MC", 10), 3), 
+                                  (("MD", 10), 4)]),
+                          ("FB", [(("MA", 12), 1),
+                                  (("MB", 12), 1)]),
+                          ("FC", [(("MA", 14), 5),
+                                  (("MB", 14), 8),
+                                  (("MC", 14), 3)])]
+
+
+medicamentos_comprar1, medicamentos_comprar2, medicamentos_comprar3 :: Medicamentos
+medicamentos_comprar1 = [("MA", 1),("MB", 1)]              -- comprarMedicamentoPreco: (2, "FB")
+medicamentos_comprar2 = [("MA", 1), ("MB", 1), ("MC", 1)]  -- comprarMedicamentoPreco: (6, "FA")
+medicamentos_comprar3 = [("MA", 13), ("MB", 13)]           -- comprarMedicamentoPreco: (169, "FC")
 
 -- QUESTÂO 1
 adicionarMedicamento :: Medicamento -> Medicamentos -> Medicamentos
@@ -67,15 +95,15 @@ tomarMedicamentoSOS name ((n, h):others)
 tomarMedicamentosHorario :: PlanoMedicamento -> Medicamentos -> HoraAtual -> (PlanoMedicamento,Medicamentos)
 tomarMedicamentosHorario medication_plan medications current_horary = (medication_plan_f, medications_f)
     where
-    medication_names = [n | (n, h, nh) <- medication_plan, nh == current_horary]
-    medication_plan_f = atualizarProximoshorarios medication_plan current_horary
-    medications_f = tomarMedicamentos medication_names medications
+        medication_names = [n | (n, h, nh) <- medication_plan, nh == current_horary]
+        medication_plan_f = atualizarProximoshorarios medication_plan current_horary
+        medications_f = tomarMedicamentos medication_names medications
 
 atualizarProximoshorarios :: PlanoMedicamento -> HoraAtual -> PlanoMedicamento
 atualizarProximoshorarios [] _       = []
 atualizarProximoshorarios ((name, horary, next_horary):medication_plan) current_horary
-    | next_horary == current_horary  = (name, horary, selectNextHorary horary current_horary):(atualizarProximoshorarios medication_plan current_horary) 
-    | otherwise                      = (name, horary, next_horary):(atualizarProximoshorarios medication_plan current_horary)
+    | next_horary == current_horary     = (name, horary, selectNextHorary horary current_horary):(atualizarProximoshorarios medication_plan current_horary) 
+    | otherwise                         = (name, horary, next_horary):(atualizarProximoshorarios medication_plan current_horary)
     where
     selectNextHorary h ch | [e | e <- h, e > ch] /= []  = minimum [e | e <- h, e > ch]
                           | otherwise                   = minimum h
@@ -102,46 +130,44 @@ comprarMedicamentosDias ((name, horary, next_horary):medication_plane) medicatio
     where
     (n, quantity) = consultarMedicamento name medications
 
--- QUESTÂO 10
-type Preco = Int
-type Farmacia = (Nome,[(Medicamento,Preco)])
-type Mercado = [Farmacia]
-type Compra = (Preco, Nome)
-
-mercado_farmacia_teste :: Mercado
-mercado_farmacia_teste = [("FA", [(("A", 10), 1), 
-                                  (("B", 10), 2), 
-                                  (("C", 10), 3), 
-                                  (("D", 10), 4)]),
-                          ("FB", [(("A", 12), 1),
-                                  (("B", 12), 1)]),
-                          ("FC", [(("A", 14), 5),
-                                  (("B", 14), 8),
-                                  (("C", 14), 3)])]
-
-medicamentos_comprados1, medicamentos_comprados2, medicamentos_comprados3 :: Medicamentos
-medicamentos_comprados1 = [("A", 1),("B", 1)]             -- comprarMedicamentoPreco: (2, "FB")
-medicamentos_comprados2 = [("A", 1), ("B", 1), ("C", 1)]  -- comprarMedicamentoPreco: (6, "FA")
-medicamentos_comprados3 = [("A", 13), ("B", 13)]          -- comprarMedicamentoPreco: (169, "FC")
-
+-- QUESTÃO 10
 comprarMedicamentosPreco :: Medicamentos -> Mercado -> Compra
-comprarMedicamentosPreco medications market = (min_price, min_pharmacy)
-    where
-    min_price = minimum[p | (p, n) <- comprarMedicamentosNaFarmacia medications market]
-    min_pharmacy = head[n, | (p, n) <- comprarMedicamentosNaFarmacia medications market, p == min_price]
+comprarMedicamentosPreco medications market = compra_final
+        where
+            compras = [comprarMedicamentosNaFarmacia medications farmacy | farmacy <- market]
+            melhor_valor = minimum [ price | (price, name) <- compras]
+            compra_final = select_by_price compras melhor_valor
 
-comprarMedicamentosNasFarmacias :: Medicamentos -> Mercado -> [Compra]
-comprarMedicamentosNasFarmacias medications [] = []
-comprarMedicamentosNasFarmacias medications (phamacy:market)
-    | temTodosMedicamentos ms mkt              = (comprarMedicamentosNaFarmacia ms mkt):(comprarMedicamentosNasFarmacias ms mkts)
-    | otherwise                                = comprarMedicamentosNasFarmacias ms mkts
-    
-{-
+
+
+select_by_price :: [Compra] -> Preco -> Compra
+select_by_price ((price, name):others) value
+    | price == value        = (price, name)
+    | otherwise             = select_by_price others value
+
+
+comprarMedicamentosNaFarmacia :: Medicamentos -> Farmacia -> Compra
+comprarMedicamentosNaFarmacia medications (name, stock) = (total_price, name)
+        where
+            price_medications = concat[unique_price meds_name need stock | (meds_name, need) <- medications]
+            total_price = foldr (+) 0 price_medications
+
+
+unique_price :: Nome -> Quantidade -> [(Medicamento,Preco)] -> [Preco]        
+unique_price meds_name need stock = [price * need | ((medication_name, quantity), price) <- stock, medication_name == meds_name]
+
+{-- QUESTÃO EXTRA 1
 main = do
+
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
     print(adicionarMedicamento ("R7", 10) remediosteste)
     print(removerMedicamento "R2" remediosteste)
     print(consultarMedicamento "R7" remediosteste)
     print(alterarMedicamento ("R7", 20) remediosteste)
     -- print(tomarMedicamentoSOS "R7" remediosteste)
--}
+
+    print(tomarMedicamentosHorario plano_medicamento_teste medicamentos_teste 23)
+    print(cadastrarAlarmes plano_medicamento_teste)
+    print(comprarMedicamentosDias plano_medicamento_teste medicamentos_teste 10)
+    print(comprarMedicamentosNaFarmacia medicamentos_teste farmacia_teste)
+    print(comprarMedicamentosPreco medicamentos_teste mercado_farmacia_teste)-}
