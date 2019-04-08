@@ -13,6 +13,7 @@ type Preco = Int
 type Farmacia = (Nome,[(Medicamento,Preco)])
 type Mercado = [Farmacia]
 type Compra = (Preco, Nome)
+type CompraFlex = (Preco, Nome, Medicamentos)
 
 hora_atual_teste :: HoraAtual
 hora_atual_teste = 12
@@ -130,30 +131,7 @@ comprarMedicamentosDias ((name, horary, next_horary):medication_plane) medicatio
     (n, quantity) = consultarMedicamento name medications
 
 -- QUESTÂO 10
-type Preco = Int
-type Farmacia = (Nome,[(Medicamento,Preco)])
-type Mercado = [Farmacia]
-type Compra = (Preco, Nome)
 
-type CompraFlex = (Preco, Nome, Medicamentos)
-
-farmacia_teste :: Farmacia
-farmacia_teste = ("FA", [(("MA", 10), 1), 
-                         (("MB", 10), 2), 
-                         (("MC", 10), 3), 
-                         (("MD", 10), 4)])
-
-
-mercado_farmacia_teste :: Mercado
-mercado_farmacia_teste = [("FA", [(("MA", 10), 1), 
-                                  (("MB", 10), 2), 
-                                  (("MC", 10), 3),
-                                  (("MD", 10), 4)]),
-                          ("FB", [(("MA", 12), 1),
-                                  (("MB", 12), 1)]),
-                          ("FC", [(("MA", 14), 5),
-                                  (("MB", 14), 8),
-                                  (("MC", 14), 3)])]
 
 comprarMedicamentosPreco :: Medicamentos -> Mercado -> Compra
 comprarMedicamentosPreco medications market = compra_final
@@ -210,7 +188,7 @@ unique_meds (name, quantity) market = unique_purchase
 
 
 
-
+{-}
 main = do
 
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
@@ -219,9 +197,10 @@ main = do
     print(consultarMedicamento "R7" remediosteste)
     print(alterarMedicamento ("R7", 20) remediosteste)
     -- print(tomarMedicamentoSOS "R7" remediosteste)
--}
+
     --print(tomarMedicamentosHorario plano_medicamento_teste medicamentos_teste 23)
     --print(cadastrarAlarmes plano_medicamento_teste)
     --print(comprarMedicamentosDias plano_medicamento_teste medicamentos_teste 10)
     --print(comprarMedicamentosNaFarmacia medicamentos_teste farmacia_teste)
     print(comprarMedicamentosPreco medicamentos_teste mercado_farmacia_teste)
+-}
