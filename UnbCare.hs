@@ -171,16 +171,39 @@ unique_price meds_name need stock = [price * need | ((medication_name, quantity)
 
 -- QUESTÃO EXTRA 1
 
-comprarMedicamentosPrecoFlex :: Medicamentos -> Mercado -> [[Compra]]
-comprarMedicamentosPrecoFlex medications market = test
-            where
-                test = [(unique_meds (name, quantity) market) | (name, quantity) <- medications]
+comprarMedicamentosPrecoFlex :: Medicamentos -> Mercado -> [CompraFlex]
+comprarMedicamentosPrecoFlex medications market = flex_final
+        where
+            allPurchases = [(unique_meds (name, quantity) market) | (name, quantity) <- medications]
+            best_purchase = [find_best_deal compras_por_med | compras_por_med <- allPurchases]
+            compra_nome = union_medication best_purchase medications
+            compras_flex = [(price, farmacy, [medicamento]) | (price, farmacy, medicamento) <- compra_nome]
+            flex_final = [union_flex compra compras_flex | compra <- compras_flex]
+            
+
+union_flex :: CompraFlex -> [CompraFlex] -> CompraFlex
+union_flex (price, farmacy, medicamentos) [] = (price, farmacy, medicamentos)
+union_flex (price, farmacy, medicamentos) ((price2, farmacy2, medicamentos2):others)
+    | farmacy == farmacy2 && medicamentos /= medicamentos2       = (price + price2, farmacy, medicamentos ++ medicamentos2)
+    | otherwise                                                  = union_flex (price, farmacy, medicamentos) others 
+
+
+
+union_medication :: [Compra] -> Medicamentos -> [(Preco, Nome, Medicamento)]
+union_medication [] [] = []
+union_medication ((price, farmacy_name):others) (medication:others2) = (price, farmacy_name, medication):union_medication others others2
+
+                
+find_best_deal :: [Compra] -> Compra
+find_best_deal [] = (0, "Sem estoque em todas as farmácias")
+find_best_deal compra = minimum compra
 
 
 unique_meds ::  Medicamento -> Mercado -> [Compra]
-unique_meds (name, quantity) market = unique_purchase
-                where
-                    unique_purchase = [comprarMedicamentosNaFarmacia [(name, quantity)] farmacy | farmacy <- market]
+unique_meds (name, quantity) market = only_available
+        where
+            unique_purchase = [comprarMedicamentosNaFarmacia [(name, quantity)] farmacy | farmacy <- market]
+            only_available = [(price,name) | (price, name) <- unique_purchase, price /= 0]
 
 
 
