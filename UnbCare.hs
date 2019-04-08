@@ -1,4 +1,4 @@
---module Main where
+module Main where
 
 type Nome = String
 type Quantidade = Int
@@ -22,7 +22,21 @@ medicamentos_teste :: Medicamentos
 medicamentos_teste = [("MA", 1),
                       ("MB", 2),
                       ("MC", 3), 
-                      ("MD", 4)]
+                      ("MD", 4),
+                      ("ME", 6)]
+                      
+mercado_farmacia_teste :: Mercado
+mercado_farmacia_teste = [("FA", [(("MA", 10), 1), 
+                                (("MB", 10), 2), 
+                                (("MC", 10), 3),
+                                (("MD", 10), 4)]),
+                        ("FB", [(("MA", 12), 1),
+                                (("MB", 12), 1),
+                                (("ME", 12), 10)]),
+                        ("FC", [(("MA", 14), 5),
+                                (("MB", 14), 8),
+                                (("ME", 12), 2),
+                                (("MC", 14), 3)])]
 
 plano_medicamento_teste :: PlanoMedicamento
 plano_medicamento_teste = [("MA", [6, 12], 12), 
@@ -37,16 +51,6 @@ farmacia_teste = ("FA", [(("MA", 10), 1),
                          (("MD", 10), 4)])
 
 
-mercado_farmacia_teste :: Mercado
-mercado_farmacia_teste = [("FA", [(("MA", 10), 1), 
-                                  (("MB", 10), 2), 
-                                  (("MC", 10), 3), 
-                                  (("MD", 10), 4)]),
-                          ("FB", [(("MA", 12), 1),
-                                  (("MB", 12), 1)]),
-                          ("FC", [(("MA", 14), 5),
-                                  (("MB", 14), 8),
-                                  (("MC", 14), 3)])]
 
 
 medicamentos_comprar1, medicamentos_comprar2, medicamentos_comprar3 :: Medicamentos
@@ -152,7 +156,7 @@ containOneMed (name, quantity) meds_in_the_farmacy = foldr (||) False check
             check = [name == meds_name && quantity <= stock | (meds_name, stock) <- meds_in_the_farmacy]
 
 select_by_price :: [Compra] -> Preco -> Compra
-select_by_price [] _ = (0, "Sem estoque em todas as farmácias")
+select_by_price [] _ = (0, "Sem estoque")
 select_by_price ((price, name):others) value
     | price == value        = (price, name)
     | otherwise             = select_by_price others value
@@ -178,14 +182,16 @@ comprarMedicamentosPrecoFlex medications market = flex_final
             best_purchase = [find_best_deal compras_por_med | compras_por_med <- allPurchases]
             compra_nome = union_medication best_purchase medications
             compras_flex = [(price, farmacy, [medicamento]) | (price, farmacy, medicamento) <- compra_nome]
-            flex_final = [union_flex compra compras_flex | compra <- compras_flex]
+            flex_final = union_flex compras_flex
             
 
-union_flex :: CompraFlex -> [CompraFlex] -> CompraFlex
-union_flex (price, farmacy, medicamentos) [] = (price, farmacy, medicamentos)
-union_flex (price, farmacy, medicamentos) ((price2, farmacy2, medicamentos2):others)
-    | farmacy == farmacy2 && medicamentos /= medicamentos2       = (price + price2, farmacy, medicamentos ++ medicamentos2)
-    | otherwise                                                  = union_flex (price, farmacy, medicamentos) others 
+union_flex :: [CompraFlex] -> [CompraFlex]
+union_flex [] = []
+union_flex ((preco, nome, medicamentos):compras) = (soma_precos, nome, lista_medicamentos) : union_flex([(p, n, ms) | (p, n, ms) <- compras , n /= nome])
+        where
+            soma_precos = foldr (+) 0 [p | (p, n, ms) <- compras, n == nome] + preco
+            lista_medicamentos = medicamentos ++ concat([ms | (p, n, ms) <- compras, n == nome])
+
 
 
 
@@ -195,7 +201,7 @@ union_medication ((price, farmacy_name):others) (medication:others2) = (price, f
 
                 
 find_best_deal :: [Compra] -> Compra
-find_best_deal [] = (0, "Sem estoque em todas as farmácias")
+find_best_deal [] = (0, "Sem estoque")
 find_best_deal compra = minimum compra
 
 
@@ -211,14 +217,14 @@ unique_meds (name, quantity) market = only_available
 
 
 
-{-}
+
 main = do
 
-    adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
-    print(adicionarMedicamento ("R7", 10) remediosteste)
-    print(removerMedicamento "R2" remediosteste)
-    print(consultarMedicamento "R7" remediosteste)
-    print(alterarMedicamento ("R7", 20) remediosteste)
+    --adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
+    --print(adicionarMedicamento ("R7", 10) remediosteste)
+    --print(removerMedicamento "R2" remediosteste)
+    --print(consultarMedicamento "R7" remediosteste)
+    --print(alterarMedicamento ("R7", 20) remediosteste)
     -- print(tomarMedicamentoSOS "R7" remediosteste)
 
     --print(tomarMedicamentosHorario plano_medicamento_teste medicamentos_teste 23)
@@ -226,4 +232,4 @@ main = do
     --print(comprarMedicamentosDias plano_medicamento_teste medicamentos_teste 10)
     --print(comprarMedicamentosNaFarmacia medicamentos_teste farmacia_teste)
     print(comprarMedicamentosPreco medicamentos_teste mercado_farmacia_teste)
--}
+    print(comprarMedicamentosPrecoFlex medicamentos_teste mercado_farmacia_teste)
