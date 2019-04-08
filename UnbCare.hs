@@ -17,8 +17,7 @@ medicamentos_teste :: Medicamentos
 medicamentos_teste = [("MA", 1),
                       ("MB", 2),
                       ("MC", 3), 
-                      ("MD", 4), 
-                      ("M0", 0)]
+                      ("MD", 4)]
 
 plano_medicamento_teste :: PlanoMedicamento
 plano_medicamento_teste = [("MA", [6, 12], 12), 
@@ -108,6 +107,8 @@ type Farmacia = (Nome,[(Medicamento,Preco)])
 type Mercado = [Farmacia]
 type Compra = (Preco, Nome)
 
+type CompraFlex = (Preco, Nome, Medicamentos)
+
 farmacia_teste :: Farmacia
 farmacia_teste = ("FA", [(("MA", 10), 1), 
                          (("MB", 10), 2), 
@@ -118,39 +119,33 @@ farmacia_teste = ("FA", [(("MA", 10), 1),
 mercado_farmacia_teste :: Mercado
 mercado_farmacia_teste = [("FA", [(("MA", 10), 1), 
                                   (("MB", 10), 2), 
-                                  (("MC", 10), 3), 
-                                  (("MD", 10), 4)]),
+                                  (("MC", 10), 3)]),
                           ("FB", [(("MA", 12), 1),
                                   (("MB", 12), 1)]),
                           ("FC", [(("MA", 14), 5),
                                   (("MB", 14), 8),
                                   (("MC", 14), 3)])]
 
-
-{-medicamentos_comprados1, medicamentos_comprados2, medicamentos_comprados3 :: Medicamentos
-medicamentos_comprar1 = [("MA", 1),("MB", 1)]             -- comprarMedicamentoPreco: (2, "FB")
-medicamentos_comprar2 = [("MA", 1), ("B", 1), ("C", 1)]  -- comprarMedicamentoPreco: (6, "FA")
-medicamentos_comprar3 = [("MA", 13), ("MB", 13)]          -- comprarMedicamentoPreco: (169, "FC")
--}
-
-{-
-comprarMedicamentosPreco :: Medicamentos -> Mercado -> Compra
-comprarMedicamentosPreco medications market = (min_price, min_pharmacy)
-    where
-    min_price = minimum[p | (p, n) <- comprarMedicamentosNaFarmacia medications market]
-    min_pharmacy = head[n, | (p, n) <- comprarMedicamentosNaFarmacia medications market, p == min_price]
--}
--- QUESTÃO 10
 comprarMedicamentosPreco :: Medicamentos -> Mercado -> Compra
 comprarMedicamentosPreco medications market = compra_final
         where
-            compras = [comprarMedicamentosNaFarmacia medications farmacy | farmacy <- market]
+            compras = [comprarMedicamentosNaFarmacia medications farmacy | farmacy <- market, (containAllMeds medications farmacy) == True]
             melhor_valor = minimum [ price | (price, name) <- compras]
             compra_final = select_by_price compras melhor_valor
 
+containAllMeds :: Medicamentos -> Farmacia -> Bool
+containAllMeds medications (name, meds) = foldr (&&) True check
+        where
+            available = [meds_name | ((meds_name, stock), price) <- meds, stock /= 0]
+            check = [(containOneMed med available) | med <- medications]
 
+containOneMed :: Medicamento -> [Nome] -> Bool
+containOneMed (name, quantity) names = foldr (||) False check
+        where
+            check = [name == listname | listname <- names]
 
 select_by_price :: [Compra] -> Preco -> Compra
+select_by_price [] _ = (0, "Sem estoque na cidade")
 select_by_price ((price, name):others) value
     | price == value        = (price, name)
     | otherwise             = select_by_price others value
@@ -160,6 +155,7 @@ comprarMedicamentosNaFarmacia :: Medicamentos -> Farmacia -> Compra
 comprarMedicamentosNaFarmacia medications (name, stock) = (total_price, name)
         where
             price_medications = concat[unique_price meds_name need stock | (meds_name, need) <- medications]
+            
             total_price = foldr (+) 0 price_medications
 
 
@@ -167,6 +163,25 @@ unique_price :: Nome -> Quantidade -> [(Medicamento,Preco)] -> [Preco]
 unique_price meds_name need stock = [price * need | ((medication_name, quantity), price) <- stock, medication_name == meds_name]
 
 -- QUESTÃO EXTRA 1
+
+comprarMedicamentosPrecoFlex :: Medicamentos -> Mercado -> [[Compra]]
+comprarMedicamentosPrecoFlex medications market = test
+            where
+                test = [(unique_meds (name, quantity) market) | (name, quantity) <- medications]
+
+
+unique_meds ::  Medicamento -> Mercado -> [Compra]
+unique_meds (name, quantity) market = unique_purchase
+                where
+                    unique_purchase = [comprarMedicamentosNaFarmacia [(name, quantity)] farmacy | farmacy <- market]
+
+
+
+
+
+
+
+
 main = do
 {-
     adicionarMedicamento ("R6", 10) . adicionarMedicamento ("R5", 20) $ remediosteste
@@ -176,8 +191,8 @@ main = do
     print(alterarMedicamento ("R7", 20) remediosteste)
     -- print(tomarMedicamentoSOS "R7" remediosteste)
 -}
-    print(tomarMedicamentosHorario plano_medicamento_teste medicamentos_teste 23)
-    print(cadastrarAlarmes plano_medicamento_teste)
-    print(comprarMedicamentosDias plano_medicamento_teste medicamentos_teste 10)
-    print(comprarMedicamentosNaFarmacia medicamentos_teste farmacia_teste)
+    --print(tomarMedicamentosHorario plano_medicamento_teste medicamentos_teste 23)
+    --print(cadastrarAlarmes plano_medicamento_teste)
+    --print(comprarMedicamentosDias plano_medicamento_teste medicamentos_teste 10)
+    --print(comprarMedicamentosNaFarmacia medicamentos_teste farmacia_teste)
     print(comprarMedicamentosPreco medicamentos_teste mercado_farmacia_teste)
