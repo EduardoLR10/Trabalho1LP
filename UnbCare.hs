@@ -119,7 +119,8 @@ farmacia_teste = ("FA", [(("MA", 10), 1),
 mercado_farmacia_teste :: Mercado
 mercado_farmacia_teste = [("FA", [(("MA", 10), 1), 
                                   (("MB", 10), 2), 
-                                  (("MC", 10), 3)]),
+                                  (("MC", 10), 3),
+                                  (("MD", 10), 4)]),
                           ("FB", [(("MA", 12), 1),
                                   (("MB", 12), 1)]),
                           ("FC", [(("MA", 14), 5),
@@ -136,16 +137,16 @@ comprarMedicamentosPreco medications market = compra_final
 containAllMeds :: Medicamentos -> Farmacia -> Bool
 containAllMeds medications (name, meds) = foldr (&&) True check
         where
-            available = [meds_name | ((meds_name, stock), price) <- meds, stock /= 0]
+            available = [(meds_name, stock) | ((meds_name, stock), price) <- meds]
             check = [(containOneMed med available) | med <- medications]
 
-containOneMed :: Medicamento -> [Nome] -> Bool
-containOneMed (name, quantity) names = foldr (||) False check
+containOneMed :: Medicamento -> Medicamentos -> Bool
+containOneMed (name, quantity) meds_in_the_farmacy = foldr (||) False check
         where
-            check = [name == listname | listname <- names]
+            check = [name == meds_name && quantity <= stock | (meds_name, stock) <- meds_in_the_farmacy]
 
 select_by_price :: [Compra] -> Preco -> Compra
-select_by_price [] _ = (0, "Sem estoque na cidade")
+select_by_price [] _ = (0, "Sem estoque em todas as farmácias")
 select_by_price ((price, name):others) value
     | price == value        = (price, name)
     | otherwise             = select_by_price others value
