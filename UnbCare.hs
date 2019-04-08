@@ -129,10 +129,12 @@ comprarMedicamentosPreco medications market = (min_price, min_pharmacy)
     where
     min_price = minimum[p | (p, n) <- comprarMedicamentosNaFarmacia medications market]
     min_pharmacy = head[n, | (p, n) <- comprarMedicamentosNaFarmacia medications market, p == min_price]
-    comprarMedicamentosNasFarmacias ms [] = []
-    comprarMedicamentosNasFarmacias ms (mkt:mkts)
-        | temTodosMedicamentos ms mkt     = (comprarMedicamentosNaFarmacia ms mkt):(comprarMedicamentosNasFarmacias ms mkts)
-        | otherwise                       = comprarMedicamentosNasFarmacias ms mkts
+
+comprarMedicamentosNasFarmacias :: Medicamentos -> Mercado -> [Compra]
+comprarMedicamentosNasFarmacias medications [] = []
+comprarMedicamentosNasFarmacias medications (phamacy:market)
+    | temTodosMedicamentos ms mkt              = (comprarMedicamentosNaFarmacia ms mkt):(comprarMedicamentosNasFarmacias ms mkts)
+    | otherwise                                = comprarMedicamentosNasFarmacias ms mkts
     
 {-
 main = do
