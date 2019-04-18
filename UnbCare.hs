@@ -84,12 +84,6 @@ listarMedicamentosComprar medications = [(n, q) | (n, q) <- medications, q <= 0]
 
 -- QUESTÂO 9
 comprarMedicamentosDias :: PlanoMedicamento -> Medicamentos -> Int -> Medicamentos
-{-
-comprarMedicamentosDias [] medications num_days = []
-comprarMedicamentosDias ((name, horary, next_horary):medication_plane) medications num_days = (name, num_days*length(horary) - quantity):(comprarMedicamentosDias medication_plane medications num_days)
-        where
-          (n, quantity) = consultarMedicamento name medications
--}
 comprarMedicamentosDias medication_plan medications num_days = map toZeroNegatives(map (\ prescription -> (nome (medicamento prescription), num_days*length(horario(prescription)) - quantidade(medicamento prescription))) medication_plan)
   where
   medicamento (n, h, nh)= consultarMedicamento n medications
