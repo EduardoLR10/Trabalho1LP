@@ -338,8 +338,7 @@ medicamentos_11 = [("MA", 2),
 
 {-
 comprarMedicamentosPrecoFlex medicamentos_11 mercado
-  = [(2, "FB", [("MB", 1)]),
-     (2, "FB", [("MB", 2)]),
+  = [(6, "FB", [("MA", 2), ("MB", 2)]),
      (1, "FC", [("MC", 1)]),
      (4, "FD", [("MD", 2), ("ME", 1)])
     ]
