@@ -169,7 +169,7 @@ find_best_deal compra = minimum compra
 unique_meds ::  Medicamento -> Mercado -> [Compra]
 unique_meds (name, quantity) market = only_available
         where
-            unique_purchase = [comprarMedicamentosNaFarmacia [(name, quantity)] farmacy | farmacy <- market]
+            unique_purchase = [comprarMedicamentosNaFarmacia [(name, quantity)] farmacy | farmacy <- market, (containAllMeds [(name, quantity)] farmacy) == True]
             only_available = [(price,name) | (price, name) <- unique_purchase, price /= 0]
 
 -------------------------------------------------------------------------------
