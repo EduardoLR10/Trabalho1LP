@@ -1,4 +1,4 @@
-module UnB where
+module UnBCare where
 
 type Nome = String
 type Quantidade = Int

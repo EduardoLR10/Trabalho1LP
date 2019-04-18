@@ -1,6 +1,6 @@
 module Test where
 
-import UnB
+import UnBCare
 medicamentos = [("MA", 1),
                 ("MB", 2),
                 ("MC", 3),
